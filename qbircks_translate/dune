@@ -1,0 +1,6 @@
+(executable
+ (name qbircks_translate)
+ (public_name qbircks-translate)
+ (libraries cmdliner hqbricks)
+ (preprocess
+  (pps ppx_deriving.show)))

@@ -1,0 +1,4 @@
+(executable
+ (public_name qec3)
+ (name main)
+ (libraries hqbricks))

@@ -1,0 +1,7 @@
+(executable
+ (name bench)
+ (libraries hqbricks algo_verif bechamel notty.unix bechamel-notty))
+
+(executable
+ (name qpe_100k_bench)
+ (libraries hqbricks algo_verif unix))

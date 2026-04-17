@@ -1,0 +1,3 @@
+(library
+ (name algo_verif)
+ (libraries hqbricks))

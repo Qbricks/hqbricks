@@ -1,0 +1,12 @@
+(tests
+ (names
+  bell_state_test
+  ghz_test
+  teleportation_test
+  qec3_test
+  qft_test
+  qpe_test
+  brus_test
+  qbircks_json_serialize_test
+  qbircks_translation_test)
+ (libraries alcotest hqbricks algo_verif))

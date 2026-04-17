@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Fact_distr (hqbricks.Hqbricks.Rewrite.Fact_distr)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.1.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script><link rel="stylesheet" href="../../../../odoc.support/katex.min.css"/><script src="../../../../odoc.support/katex.min.js"></script><script>
+//<![CDATA[
+
+          document.addEventListener("DOMContentLoaded", function () {
+            var elements = Array.from(document.getElementsByClassName("odoc-katex-math"));
+            for (var i = 0; i < elements.length; i++) {
+              var el = elements[i];
+              var content = el.textContent;
+              var new_el = document.createElement("span");
+              new_el.setAttribute("class", "odoc-katex-math-rendered");
+              var display = el.classList.contains("display");
+              katex.render(content, new_el, { throwOnError: false, displayMode: display });
+              el.replaceWith(new_el);
+            }
+          });
+        
+//]]>
+</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../index.html">Index</a> &#x00BB; <a href="../../../index.html">hqbricks</a> &#x00BB; <a href="../../index.html">Hqbricks</a> &#x00BB; <a href="../index.html">Rewrite</a> &#x00BB; Fact_distr</nav><header class="odoc-preamble"><h1>Module <code><span>Rewrite.Fact_distr</span></code></h1><p>Factorize Distr (FD) rewrite rule.</p><p>This module contains functions for the Factorize Distr rule, formally:</p><div><pre class="odoc-katex-math display">      \frac
+      {
+      \texttt{Pvar}(\texttt{p}_1,\texttt{o}_1,\texttt{s}_1,\texttt{su}_1)
+      \cap\texttt{Pvar}(\texttt{p}_2,\texttt{o}_2,\texttt{s}_2,
+      \texttt{su}_2) = \emptyset
+      \qquad
+      \texttt{0ad}_1\cap \texttt{0ad}_2 = \emptyset
+      }
+      {
+      \left\langle\texttt{p}_1,\texttt{s}_1\cdot\texttt{o}_1\right\rangle_{\texttt{su}_1}
+      \otimes
+      \left\langle\texttt{p}_2,\texttt{s}_2\cdot\texttt{o}_2\right\rangle_{\texttt{su}_2}
+      \equiv^{\texttt{p}}
+      \left\langle\texttt{p}_1+\texttt{p}_2,\texttt{s}_1*\texttt{s}_2\cdot
+      \texttt{o}_1\cup\texttt{o}_2\right\rangle_{\texttt{su}_1\cup\texttt{su}_2}
+      }
+      \text{(FD)}
+    </pre></div><p>The FD rule is a factorisation rule used to separate an HPS into a tensor product of two HPS. It has two implementation:</p><ul><li>Register separation (see <a href="Reg/index.html"><code>Reg</code></a>).</li><li>Variable separation (see <a href="Xy_vars/index.html"><code>Xy_vars</code></a>), mainly used to automatically factorize an HPS to the maximum using the <a href="Xy_vars/index.html#val-find_and_apply_all"><code>Xy_vars.find_and_apply_all</code></a> heuristic.</li></ul></header><div class="odoc-content"><div class="odoc-spec"><div class="spec module anchored" id="module-Reg"><a href="#module-Reg" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Reg/index.html">Reg</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div><div class="spec-doc"><p><a href="#"><code>Fact_distr</code></a> rewrite rule to separate registers.</p></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-Xy_vars"><a href="#module-Xy_vars" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Xy_vars/index.html">Xy_vars</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div><div class="spec-doc"><p><a href="#"><code>Fact_distr</code></a> rewrite rule to separate variables.</p></div></div></div></body></html>

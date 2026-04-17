@@ -1,0 +1,35 @@
+FROM ocaml/opam:ubuntu-24.04-ocaml-5.3
+
+USER root
+
+# Install system dependencies
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install -y libgmp-dev pkg-config libmpfr-dev
+
+# Set working directory
+WORKDIR /hqbricks
+
+RUN chown opam:opam /hqbricks
+
+USER opam
+
+# Install HQbricks
+COPY --chown=opam:opam lib lib
+COPY --chown=opam:opam algo_verif algo_verif
+COPY --chown=opam:opam bench bench
+COPY --chown=opam:opam example example
+COPY --chown=opam:opam test test
+COPY --chown=opam:opam qbircks_translate qbircks_translate
+COPY --chown=opam:opam doc doc
+COPY --chown=opam:opam docs docs
+COPY --chown=opam:opam dune-project hqbricks.opam README.md ./
+
+RUN eval $(opam env) && \
+    opam pin add mlmpfr https://github.com/thvnx/mlmpfr.git && \
+    opam install . --deps-only --with-test --verbose --yes && \
+    dune build && \
+    opam install . --working-dir -y
+
+# Command to run benches
+CMD ["dune", "exec", "bench/bench.exe"]

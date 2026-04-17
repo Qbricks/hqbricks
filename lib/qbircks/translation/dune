@@ -1,0 +1,3 @@
+(ocamllex openqasm2_lexer aqasm_lexer)
+
+(ocamlyacc openqasm2_parser aqasm_parser)
