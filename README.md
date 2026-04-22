@@ -9,36 +9,52 @@ Key features:
 
 ## Install
 
-1. Install [OCaml](https://ocaml.org/install) and [dune](https://dune.build/install).
+1. Install [OCaml](https://ocaml.org/install).
 
-2. Create a local opam switch (OCaml **5.3.0** is required). From the root of the project, run:  
-`opam switch create . 5.3.0`  
-`eval $(opam env)`
+2. Create an OPAM switch with OCaml version 5.3.0:
+```
+opam switch create 5.3.0
+eval $(opam env)
+```
 
-3. Install project dependencies. From the root of the project run:  
-`opam install . --deps-only`
+3. Install project dependencies:
+```
+opam install . --deps-only --with-test
+```
 
-4. Build the project. From the root of the project run:  
-`dune build`
+4. Build the project:
+```
+dune build
+```
 
-5. Install the hqbricks library and the QbIRcks Translate command. From the root of the project run:  
-`dune install`
+5. Install the HQbricks library and the QbIRcks Translate command:
+```
+dune install
+```
 
-6. Install the Jupyter Notebook tutorial (if needed). From the root of the project run:  
-`docker build -f Dockerfile.hqbricks-tuto -t hqbricks-tuto .`
+6. Optional: Install the Jupyter Notebook tutorial Docker image:
+```
+docker build -f Dockerfile.hqbricks-tuto -t hqbricks-tuto .
+```
 
-7. Install HQbricks in Docker (if needed). From the root of the project run:  
-`docker build -f Dockerfile.hqbricks -t hqbricks .`
+7. Optional: Install the HQbricks Docker image:
+```
+docker build -f Dockerfile.hqbricks -t hqbricks .
+```
 
 ## HQbricks library
 
-The documentation of the HQbricks library is available in `docs/index.html` and can be opened in a web browser. It contains a **Getting Started guide** in the beginning of the `Hqbricks` documentation with a simple Quantum Teleportation verification example. The code can be found in `example/teleportation.ml`, and can be run using:  
-`dune exec example/teleportation.exe`
+The documentation of the HQbricks library is available in `docs/index.html` and can be opened in a web browser. It contains a **Getting Started guide** in the beginning of the `Hqbricks` documentation with a simple Quantum Teleportation verification example. The code can be found in `example/teleportation.ml`, and can be run using:
+```
+dune exec example/teleportation.exe
+```
 
 ## Jupyter Notebook tutorial
 
-To access the Jupyter Notebook tutorial, from the root of the repository run:  
-`docker run -it --rm -p 8888:8888 hqbricks-tuto`
+To access the Jupyter Notebook tutorial, run:
+```
+docker run -it --rm -p 8888:8888 hqbricks-tuto
+```
 
 Then open this link in a web browser:  
 [http://localhost:8888/](http://localhost:8888/)
