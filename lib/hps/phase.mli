@@ -129,6 +129,9 @@ val find_all_y_not_one_half : t -> Y_set.t
 (** Return a set of all the path variables y that appear in a monomial with a
     coefficient that is not 1/2 in the given phase. *)
 
+val find_all_hkets : t -> Hket_set.t
+(** Return a set of all {!Hket} in the given phase. *)
+
 (** {1:iteration Iteration} *)
 
 val iter : (Var_set.t -> Dyadic1.t -> unit) -> t -> unit
@@ -145,6 +148,10 @@ val fold : (Var_set.t -> Dyadic1.t -> 'acc -> 'acc) -> t -> 'acc -> 'acc
 
 val equal : t -> t -> bool
 (** Equality test. *)
+
+val equiv : t -> t -> bool
+(** Equivalence test. Check if phase are the same with at most a global phase
+    gap *)
 
 (** {1:predicates Predicates} *)
 
@@ -185,3 +192,6 @@ val contains_y_not_one_half : int -> t -> bool
 
 val to_string : t -> string
 (** Convert to string. *)
+
+val to_latex : t -> string
+(** Convert to LaTeX ready string. *)

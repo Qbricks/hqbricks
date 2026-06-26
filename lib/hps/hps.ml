@@ -34,6 +34,7 @@ module Mem = Mem
 module Mem_stack = Mem_stack
 module Output = Output
 module Support = Support
+module Hket_set = Hket_set
 
 type t = {
   phase : Phase.t;
@@ -257,6 +258,11 @@ let norm2_opt hps =
     else None
   else None
 
+let find_all_hkets hps =
+  Phase.find_all_hkets hps.phase
+  |> Hket_set.union (Scalar.find_all_hkets hps.scalar)
+  |> Hket_set.union (Output.find_all_hkets hps.output)
+
 let equal hps1 hps2 =
   Phase.equal hps1.phase hps2.phase
   && Output.equal hps1.output hps2.output
@@ -286,3 +292,13 @@ let to_string hps =
   ^ Output.to_string indent hps.output
   ^ "\n>"
   ^ Support.to_string hps.support
+
+let to_latex_aux hps start_str end_str =
+  start_str ^ "\\left\\langle " ^ Phase.to_latex hps.phase ^ "\\; , \\;"
+  ^ Scalar.to_latex hps.scalar ^ "\\; \\cdot \\;" ^ Output.to_latex hps.output
+  ^ "\\right\\rangle_{"
+  ^ Support.to_latex hps.support
+  ^ "}" ^ end_str
+
+let to_latex hps = to_latex_aux hps "" ""
+let to_latex_block hps = to_latex_aux hps "\\[" "\\]"

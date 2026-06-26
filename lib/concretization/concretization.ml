@@ -33,7 +33,7 @@ module Vector_map = struct
     let to_string (p, s) =
       if Phase.eq_zero p then Scalar.to_string s
       else if Phase.eq_one_half p then Scalar.to_string Scalar.(simp @@ SNeg s)
-      else "e^(2πi * " ^ Phase.to_string p ^ ") * " ^ Scalar.to_string s
+      else "e^(2πi * (" ^ Phase.to_string p ^ ")) * " ^ Scalar.to_string s
   end
 
   module Mem_map = struct
@@ -110,6 +110,7 @@ module Vector_map = struct
 
   let find_opt ms vm = Mem_stack_map.find_opt ms vm
   let fold f vm acc = Mem_stack_map.fold f vm acc
+  let iter f vm = Mem_stack_map.iter f vm
   let equal = Mem_stack_map.equal Mem_map.equal
 
   (*
@@ -155,6 +156,14 @@ module Vector_map = struct
         acc ^ Mem_stack.to_string "" cms ^ ":\n" ^ Mem_map.to_string "  " mm
         ^ "\n")
       vm ""
+
+  let fprint oc vm =
+    iter
+      (fun cms mm ->
+        Printf.fprintf oc "%s:\n%s\n"
+          (Mem_stack.to_string "" cms)
+          (Mem_map.to_string "  " mm))
+      vm
 end
 
 let hps_proba_output output_spec hps =
@@ -177,6 +186,22 @@ let hps_proba_qmem qmem_spec hps =
         | _ -> acc
       else acc)
     vm Scalar.zero
+
+let hps_proba_qmem_phase qmem_spec phase_spec hps =
+  let vm = Vector_map.of_hps hps in
+  Vector_map.fold
+    (fun _ mm acc ->
+      if Vector_map.Mem_map.M.cardinal mm == 1 then
+        match Vector_map.Mem_map.M.choose mm with
+        | qmem, (p, s) when Mem.equal qmem qmem_spec && Phase.equiv phase_spec p
+          ->
+            Scalar.(simp @@ SAdd (acc, square s))
+        | _ -> acc
+      else acc)
+    vm Scalar.zero
+
+let hps_proba_qmem_no_rel_phase qmem_spec hps =
+  hps_proba_qmem_phase qmem_spec Phase.zero hps
 
 let split_qmem_spec qmem_spec hps_product =
   let qmem_spec = ref qmem_spec in

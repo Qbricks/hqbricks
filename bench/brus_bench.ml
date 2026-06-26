@@ -79,7 +79,7 @@ let brus ?metrics u input_hps spec_cmem delta k =
   let succ_p = ref Hps.Scalar.zero in
   let spec_fail_p = ref Hps.Scalar.one in
   for _ = 0 to k - 1 do
-    let h = Evaluator.evaluate_prog u !hps ~print:false ?metrics in
+    let h = Evaluator.evaluate_prog u !hps ~print:Pr_none ?metrics in
     let step_succ_p =
       Concretization.hps_proba_cmem_split spec_cmem h ?metrics
     in

@@ -62,7 +62,7 @@ let teleportation_oqasm2 =
 let qec3_oqasm2 =
   "OPENQASM 2.0;\n\
    include \"qelib1.inc\";\n\n\
-   opaque ie(frac) q;\n\n\
+   opaque ie_x(frac) q;\n\n\
    qreg q[2];\n\
    qreg psi[1];\n\
    qreg c[2];\n\n\
@@ -70,8 +70,8 @@ let qec3_oqasm2 =
    reset q;\n\
    CX psi[0],q[0];\n\
    CX q[0],q[1];\n\
-   ie(2/3) psi;\n\
-   ie(2/3) q;\n\
+   ie_x(2/3) psi;\n\
+   ie_x(2/3) q;\n\
    reset c;\n\
    h c;\n\
    cz c[0],psi;\n\
@@ -123,16 +123,16 @@ let teleportation_aqasm =
    END\n"
 
 let qec3_aqasm =
-  "DEFINE PARAM IE float : 1\n\n\
+  "DEFINE PARAM IE_X float : 1\n\n\
    BEGIN\n\
    qubits 5\n\
    cbits 3\n\n\
    RESET q[0],q[1]\n\
    CTRL(X) q[2],q[0]\n\
    CTRL(X) q[0],q[1]\n\
-   IE[2/3] q[2]\n\
-   IE[2/3] q[0]\n\
-   IE[2/3] q[1]\n\
+   IE_X[2/3] q[2]\n\
+   IE_X[2/3] q[0]\n\
+   IE_X[2/3] q[1]\n\
    RESET q[3],q[4]\n\
    H q[3]\n\
    H q[4]\n\

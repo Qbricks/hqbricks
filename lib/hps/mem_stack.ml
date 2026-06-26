@@ -63,6 +63,11 @@ let find_reg_names ms =
     (fun acc m -> Reg_name_set.union acc (Mem.find_reg_names m))
     Reg_name_set.empty ms
 
+let find_all_hkets ms =
+  List.fold_left
+    (fun acc m -> Hket_set.union acc (Mem.find_all_hkets m))
+    Hket_set.empty ms
+
 let equal ms1 ms2 =
   List.equal Mem.equal (remove_trailing_voids ms1) (remove_trailing_voids ms2)
 
@@ -84,3 +89,5 @@ let to_string indent cms =
   indent ^ "[\n" ^ elem_indent
   ^ String.concat (",\n" ^ elem_indent) (List.map Mem.cmem_to_string cms)
   ^ "\n" ^ indent ^ "]"
+
+let to_latex cms = match cms with [] -> "" | cm :: _ -> Mem.cmem_to_latex cm

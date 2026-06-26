@@ -137,13 +137,133 @@ val equal : t -> t -> bool
 val to_string : t -> string
 (** Convert to string. *)
 
+val to_latex : t -> string
+(** Convert to LaTeX string. *)
+
+val for_header_to_string : string -> Base.pr_int -> Base.pr_int -> string
+(** [for_header_to_string var_name i_start i_end] converts the given parameters
+    to a for header string [for var_name = i_start, i_end do], where [var_name]
+    is the name of the iterated variable, [i_start] is the start value, and
+    [i_end] is the end value. *)
+
+val for_header_to_latex : string -> Base.pr_int -> Base.pr_int -> string
+(** [for_header_to_latex var_name i_start i_end] converts the given parameters
+    to a for header LaTeX string [for var_name = i_start, i_end do], where
+    [var_name] is the name of the iterated variable, [i_start] is the start
+    value, and [i_end] is the end value. *)
+
+val for_iteration_to_string : string -> int -> string
+(** [for_iteration_to_string var_name i] converts the given parameters to a for
+    iteration string [var_name = n], where [var_name] is the name of the
+    iterated variable and [i] is its the current value. *)
+
+val for_iteration_to_latex : string -> int -> string
+(** [for_iteration_to_latex var_name i] converts the given parameters to a for
+    iteration LaTeX string [var_name = n], where [var_name] is the name of the
+    iterated variable and [i] is its the current value. *)
+
+val if_cond_to_string : Base.pr_bool -> string
+(** Convert the given condition to an if string. *)
+
+val if_cond_to_latex : Base.pr_bool -> string
+(** Convert the given condition to an if LaTeX string. *)
+
+val for_unfolding_str : string
+(** For [unfolding...] string. *)
+
+val for_done_str : string
+(** For [done] string. *)
+
+val else_str : string
+(** [else] string. *)
+
+val if_end_str : string
+(** If [end] string. *)
+
 (** {1:printing Printing} *)
+
+(** {2:prog_pretty_printers Prog Pretty-Printers} *)
 
 val pp : Format.formatter -> t -> unit
 (** Print the given prog on the specified formatter. *)
 
 val print : t -> unit
 (** Print the given prog. *)
+
+(** {2:prog_evaluation_traces Prog Evaluation Traces} *)
+
+(** Functions for printing to an output channel with an indentation, using the
+    [to_string] functions and [str] values defined in {!conversions}. They are
+    used by the {!Evaluator} to display the evaluation steps. *)
+
+val output : ?indent_level:int -> out_channel -> t -> unit
+(** Print the given prog to the specified output channel, with an optional
+    indentation level (default: 0). *)
+
+val output_for_unfolding : ?indent_level:int -> out_channel -> unit
+(** Print for [unfolding...] to the specified output channel, with an optional
+    indentation level (default: 0). *)
+
+val output_for_header :
+  ?indent_level:int -> out_channel -> string * Base.pr_int * Base.pr_int -> unit
+(** Print the given for header to the specified output channel, with an optional
+    indentation level (default: 0). *)
+
+val output_for_iteration :
+  ?indent_level:int -> out_channel -> string * int -> unit
+(** Print the given for iteration to the specified output channel, with an
+    optional indentation level (default: 0). *)
+
+val output_if_cond : ?indent_level:int -> out_channel -> Base.pr_bool -> unit
+(** Print the given if cond to the specified output channel, with an optional
+    indentation level (default: 0). *)
+
+val output_for_done : ?indent_level:int -> out_channel -> unit
+(** Print for [done] to the specified output channel, with an optional
+    indentation level (default: 0). *)
+
+val output_else : ?indent_level:int -> out_channel -> unit
+(** Print [else] to the specified output channel, with an optional indentation
+    level (default: 0). *)
+
+val output_if_end : ?indent_level:int -> out_channel -> unit
+(** Print if [end] to the specified output channel, with an optional indentation
+    level (default: 0). *)
+
+val output_latex : ?indent_level:int -> out_channel -> t -> unit
+(** Print the given prog in LaTeX format to the specified output channel, with
+    an optional indentation level (default: 0). *)
+
+val output_latex_for_header :
+  ?indent_level:int -> out_channel -> string * Base.pr_int * Base.pr_int -> unit
+(** Print the given for header in LaTeX format to the specified output channel,
+    with an optional indentation level (default: 0). *)
+
+val output_latex_for_iteration :
+  ?indent_level:int -> out_channel -> string * int -> unit
+(** Print the given for iteration in LaTeX format to the specified output
+    channel, with an optional indentation level (default: 0). *)
+
+val output_latex_if_cond :
+  ?indent_level:int -> out_channel -> Base.pr_bool -> unit
+(** Print the given if cond in LaTeX format to the specified output channel,
+    with an optional indentation level (default: 0). *)
+
+val output_latex_for_unfolding : ?indent_level:int -> out_channel -> unit
+(** Print for [unfolding...] in LaTeX format to the specified output channel,
+    with an optional indentation level (default: 0). *)
+
+val output_latex_for_done : ?indent_level:int -> out_channel -> unit
+(** Print for [done] in LaTeX format to the specified output channel, with an
+    optional indentation level (default: 0). *)
+
+val output_latex_else : ?indent_level:int -> out_channel -> unit
+(** Print [else] in LaTeX format to the specified output channel, with an
+    optional indentation level (default: 0). *)
+
+val output_latex_if_end : ?indent_level:int -> out_channel -> unit
+(** Print if [end] in LaTeX format to the specified output channel, with an
+    optional indentation level (default: 0). *)
 
 (** {1:base_include Base Include} *)
 

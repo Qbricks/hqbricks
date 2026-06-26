@@ -22,14 +22,23 @@
 
 (** Clifford-k-err gate set.
 
-    Clifford_k gate set with the addition of an identity error gate IE. *)
+    Clifford_k gate set with the addition of the identities error gate IE, IE_X
+    and IE_Z. *)
 
 include module type of Clifford_k
 (** Clifford_k gates. *)
 
-val ie : Hps.Scalar.t -> Prog.Base.qreg -> Prog.Gate.t
-(** Identity error gate, noisy Identity gate with the given probability of
-    success. *)
+val ie_x : Hps.Scalar.t -> Prog.Base.qreg -> Prog.Gate.t
+(** Identity error gate for bitflip, noisy Identity gate with the given
+    probability of error X. *)
+
+val ie_z : Hps.Scalar.t -> Prog.Base.qreg -> Prog.Gate.t
+(** Identity error gate for phaseflip, noisy Identity gate with the given
+    probability of error Z. *)
+
+val ie : Hps.Scalar.t -> Hps.Scalar.t -> Prog.Base.qreg -> Prog.Gate.t
+(** Identity error gate, noisy Identity gate with p_w and p_v the given
+    probabilities of errors X and Z. *)
 
 val ir_gate_func_map : (Qbircks.Gate.t -> Prog.t) Qbircks.Ast.Gate_name_map.t
 (** Map from gate name (string) to a function to convert {!Qbircks.Gate.t} to

@@ -81,6 +81,9 @@ val find_y_in_regs : Reg_name_set.t -> t -> Y_set.t
 val find_reg_names : t -> Reg_name_set.t
 (** Returns a set of all register names in the given memory stack. *)
 
+val find_all_hkets : t -> Hket_set.t
+(** Return a set of all {!Hket} in the given memory stack. *)
+
 (** {1:comparisons Comparisons} *)
 
 val equal : t -> t -> bool
@@ -113,3 +116,6 @@ val contains_y_from_set : Y_set.t -> t -> bool
 
 val to_string : string -> t -> string
 (** Convert to string. *)
+
+val to_latex : t -> string
+(** Convert to LaTeX string. *)

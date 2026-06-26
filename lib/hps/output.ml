@@ -74,6 +74,10 @@ let find_reg_names o =
     (Mem.find_reg_names o.qmem)
     (Mem_stack.find_reg_names o.cmem_stack)
 
+let find_all_hkets o =
+  Mem.find_all_hkets o.qmem
+  |> Hket_set.union (Mem_stack.find_all_hkets o.cmem_stack)
+
 let equal o1 o2 =
   Mem.equal o1.qmem o2.qmem && Mem_stack.equal o1.cmem_stack o2.cmem_stack
 
@@ -97,3 +101,5 @@ let contains_y_from_set yset o =
 
 let to_string indent o =
   Mem.qmem_to_string o.qmem ^ "\n" ^ Mem_stack.to_string indent o.cmem_stack
+
+let to_latex o = Mem.qmem_to_latex o.qmem ^ Mem_stack.to_latex o.cmem_stack

@@ -120,6 +120,9 @@ val change_var : int -> Hket.t -> t -> t
 val cardinal : t -> int
 (** Count the number of reg_id. *)
 
+val cardinal_reg_name : string -> t -> int
+(** Count the number of reg_id where reg_id name is reg_name. *)
+
 (** {1:searching Searching} *)
 
 val find : reg_id -> t -> Hket.t
@@ -139,6 +142,9 @@ val find_y_in_regs : Reg_name_set.t -> t -> Y_set.t
 
 val find_reg_names : t -> Reg_name_set.t
 (** Returns a set of all register names in the given memory. *)
+
+val find_all_hkets : t -> Hket_set.t
+(** Return a set of all {!Hket} in the given memory. *)
 
 (** {1:iteration Iteration} *)
 
@@ -216,3 +222,9 @@ val qmem_to_string : t -> string
 
 val cmem_to_string : t -> string
 (** Convert the given memory to string using classical memory format. *)
+
+val qmem_to_latex : t -> string
+(** Convert the given memory to LaTeX string using quantum memory format. *)
+
+val cmem_to_latex : t -> string
+(** Convert the given memory to LaTeX string using classical memory format. *)

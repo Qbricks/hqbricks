@@ -167,6 +167,7 @@ let iter = S.iter
 let equal ket1 ket2 = S.equal ket1 ket2
 let compare vs1 vs2 = S.compare vs1 vs2
 let of_var var = empty |> add Var_set.(empty |> add var)
+let of_var_set vs = S.singleton vs
 
 let of_string_ff_aux acc str =
   if str = "" then failwith "Hket.of_string"
@@ -212,3 +213,16 @@ let to_string ket =
     in
     let str = S.fold fold_fun ket "" in
     String.sub str 0 (String.length str - String.length " ⊕ ")
+
+let to_latex ket =
+  if is_zero ket then "0"
+  else if is_one ket then "1"
+  else
+    let fold_fun vs acc =
+      if Var_set.cardinal vs = 0 then acc ^ "1 \\oplus "
+      else
+        let str = Var_set.fold (fun v acc -> acc ^ Var.to_latex v) vs acc in
+        str ^ " \\oplus "
+    in
+    let str = S.fold fold_fun ket "" in
+    String.sub str 0 (String.length str - String.length " \\oplus ")

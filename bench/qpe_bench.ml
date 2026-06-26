@@ -92,7 +92,7 @@ let verify_qpe_concrete ?metrics theta_num e_len c_len =
   let input_hps = Hps.(one |> add_qmem_int ("E", 0) e_len theta_num) in
   let hps =
     Evaluator.(
-      evaluate_prog prog input_hps ~rewrite_settings:no_rewrite ~print:false
+      evaluate_prog prog input_hps ~rewrite_settings:no_rewrite ~print:Pr_none
         ?metrics)
   in
   let theta'_num = compute_theta' theta_num e_len c_len in
@@ -111,7 +111,7 @@ let verify_qpe_concrete_exact ?metrics theta_num e_len c_len =
   let input_hps = Hps.(one |> add_qmem_int ("E", 0) e_len theta_num) in
   let hps =
     Evaluator.(
-      evaluate_prog prog input_hps ~rewrite_settings:no_rewrite ~print:false
+      evaluate_prog prog input_hps ~rewrite_settings:no_rewrite ~print:Pr_none
         ?metrics)
   in
   let theta'_num = compute_theta' theta_num e_len c_len in
@@ -130,7 +130,7 @@ let verify_qpe_symbolic_exact ?metrics n =
   let input_hps = Hps.(one |> add_qmem_vec_x ("E", 0) e_len 0) in
   let hps =
     Evaluator.(
-      evaluate_prog prog input_hps ~rewrite_settings:all_auto ~print:false
+      evaluate_prog prog input_hps ~rewrite_settings:all_auto ~print:Pr_none
         ?metrics)
   in
   let spec_p = Hps.Scalar.one in
@@ -147,7 +147,7 @@ let verify_qpe_gate_concrete ?metrics theta_num theta_den_pow c_len =
   let input_hps = Hps.one in
   let hps =
     Evaluator.(
-      evaluate_prog prog input_hps ~rewrite_settings:no_rewrite ~print:false
+      evaluate_prog prog input_hps ~rewrite_settings:no_rewrite ~print:Pr_none
         ?metrics)
   in
   let theta'_num = compute_theta' theta_num theta_den_pow c_len in

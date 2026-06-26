@@ -24,41 +24,98 @@ module Base = Base
 open Hps
 open Base
 
-let print_step prog hps =
-  Prog.print prog;
-  print_endline (Hps.to_string hps ^ "\n")
+type print = Pr_none | Pr_plain of out_channel | Pr_latex of out_channel
 
-let auto_hh_rewrite ?(print = true) ?metrics hps =
-  if print then print_endline "Automatic hh rewrite:";
+let print_step print prog hps indent_level =
+  match print with
+  | Pr_plain oc ->
+      Printf.fprintf oc "%a\n%s\n\n"
+        (Prog.output ~indent_level)
+        prog (Hps.to_string hps)
+  | Pr_latex oc ->
+      Printf.fprintf oc "\\texttt{%a} & %s\\\\\n"
+        (Prog.output_latex ~indent_level)
+        prog (Hps.to_latex hps)
+  | Pr_none -> ()
+
+let auto_hh_rewrite ?(print = Pr_plain stdout) ?metrics hps =
+  (match print with
+  | Pr_plain oc -> Printf.fprintf oc "Automatic hh rewrite:\n"
+  | Pr_latex oc -> Printf.fprintf oc "\\texttt{Automatic HH rewrite:}\\newline "
+  | Pr_none -> ());
   let hh_y_pairs, hps = Rewrite.Hh.find_and_apply_all hps ?metrics in
   if hh_y_pairs = [] then (
-    if print then print_endline "No hh found\n";
+    (match print with
+    | Pr_plain oc -> Printf.fprintf oc "No hh found\n\n"
+    | Pr_latex oc -> Printf.fprintf oc "\\texttt{No HH found}&\\\\\n"
+    | Pr_none -> ());
     (hps, false))
-  else (
-    if print then (
-      List.iter
-        (fun (yi0, yi1) ->
-          Printf.printf "hh applied between y%d and y%d\n" yi0 yi1)
-        hh_y_pairs;
-      print_endline (Hps.to_string hps ^ "\n"));
-    (hps, true))
+  else
+    match print with
+    | Pr_plain oc ->
+        List.iter
+          (fun (yi0, yi1) ->
+            Printf.fprintf oc "hh applied between y%d and y%d\n" yi0 yi1)
+          hh_y_pairs;
+        Printf.fprintf oc "%s\n\n" (Hps.to_string hps);
+        (hps, true)
+    | Pr_latex oc ->
+        let sep = "\\newline " in
+        let str =
+          List.fold_left
+            (fun acc (yi0, yi1) ->
+              acc ^ sep
+              ^ Printf.sprintf
+                  "\\texttt{HH applied between } y_{%d} \\texttt{ and } y_{%d}"
+                  yi0 yi1)
+            "" hh_y_pairs
+        in
+        let str = Str.string_after str (String.length sep) in
+        Printf.fprintf oc "%s & %s\\\\\n" str (Hps.to_latex hps);
+        (hps, true)
+    | Pr_none -> (hps, true)
 
-let auto_change_var_rewrite ?(print = true) ?metrics hps =
+let auto_change_var_rewrite ?(print = Pr_plain stdout) ?metrics hps =
   Rewrite.Change_var.(
-    if print then print_endline "Automatic change_var rewrite:";
+    (match print with
+    | Pr_plain oc -> Printf.fprintf oc "Automatic change_var rewrite:\n"
+    | Pr_latex oc ->
+        Printf.fprintf oc "\\texttt{Automatic change\\_var rewrite:}\\newline "
+    | Pr_none -> ());
     let cv_map, hps = find_and_apply_all_y_xor_no_y hps ?metrics in
     if Utils.Int_map.is_empty cv_map then (
-      if print then print_endline "No change_var found\n";
+      (match print with
+      | Pr_plain oc -> Printf.fprintf oc "No change_var found\n\n"
+      | Pr_latex oc ->
+          Printf.fprintf oc "\\texttt{No change\\_var found}&\\\\\n"
+      | Pr_none -> ());
       (hps, false))
-    else (
-      if print then (
-        Utils.Int_map.iter
-          (fun yi k ->
-            Printf.printf "change_var applied: changed y%d -> %s\n" yi
-              (Hket.to_string k))
-          cv_map;
-        print_endline (Hps.to_string hps ^ "\n"));
-      (hps, true)))
+    else
+      match print with
+      | Pr_plain oc ->
+          Utils.Int_map.iter
+            (fun yi k ->
+              Printf.fprintf oc "change_var applied: changed y%d -> %s\n" yi
+                (Hket.to_string k))
+            cv_map;
+          Printf.fprintf oc "%s\n\n" (Hps.to_string hps);
+          (hps, true)
+      | Pr_latex oc ->
+          let sep = "\\newline " in
+          let str =
+            Utils.Int_map.fold
+              (fun yi k acc ->
+                acc ^ sep
+                ^ Printf.sprintf
+                    "\\texttt{change\\_var applied: changed } y_{%d} \
+                     \\rightarrow %s"
+                    yi (Hket.to_latex k))
+              cv_map ""
+          in
+          let str = Str.string_after str (String.length sep) in
+          Printf.fprintf oc "%s & %s\\\\\n" str (Hps.to_latex hps);
+          (hps, true)
+      | Pr_none -> (hps, true))
 
 let split_command cmd_str =
   (* A leading space is added to cmd_str for the first match *)
@@ -220,17 +277,18 @@ let auto_change_var = 0b100
 let all_auto = 0b110
 let all_rewrite = 0b111
 
-let auto_hh_with_settings ?(print = true) ?metrics rewrite_settings hps =
+let auto_hh_with_settings ?(print = Pr_none) ?metrics rewrite_settings hps =
   if rewrite_settings land auto_hh <> 0 then auto_hh_rewrite hps ~print ?metrics
   else (hps, false)
 
-let auto_change_var_with_settings ?(print = true) ?metrics rewrite_settings hps
-    =
+let auto_change_var_with_settings ?(print = Pr_none) ?metrics rewrite_settings
+    hps =
   if rewrite_settings land auto_change_var <> 0 then
     auto_change_var_rewrite hps ~print ?metrics
   else (hps, false)
 
-let auto_rewrite_with_settings ?(print = true) ?metrics rewrite_settings hps =
+let auto_rewrite_with_settings ?(print = Pr_none) ?metrics rewrite_settings hps
+    =
   let hps, change_var_applied =
     auto_change_var_with_settings rewrite_settings hps ~print ?metrics
   in
@@ -245,12 +303,15 @@ let interactive_rewrite_with_settings ?metrics rewrite_settings hps =
   else hps
 
 let rec evaluate_prog_aux ?(k = Hket.one) ?(var_val = Utils.Var_name_map.empty)
-    ?(rewrite_settings = no_rewrite) ?(print = true) ?metrics prog hps =
+    ?(rewrite_settings = no_rewrite) ?(print = Pr_none) ?metrics prog hps
+    indent_level =
   if Hket.is_zero k then hps
   else
     match prog with
     | Prog.PVar _ -> failwith "Cannot evaluate PVar into an hps"
-    | Prog.Skip -> hps
+    | Prog.Skip ->
+        print_step print prog hps indent_level;
+        hps
     | Prog.InitQReg qreg ->
         if not @@ Hket.is_one k then
           (* In order to handle InitQReg in IfElse, we need to check that
@@ -270,38 +331,92 @@ let rec evaluate_prog_aux ?(k = Hket.one) ?(var_val = Utils.Var_name_map.empty)
             else hps
           in
           let hps = loop 0 hps in
-          if print then print_step prog hps;
+          print_step print prog hps indent_level;
           interactive_rewrite_with_settings rewrite_settings hps ?metrics
     | Prog.Seq (prog1, prog2) ->
         let hps =
-          evaluate_prog_aux prog1 hps ~k ~var_val ~rewrite_settings ~print
-            ?metrics
+          evaluate_prog_aux prog1 hps indent_level ~k ~var_val ~rewrite_settings
+            ~print ?metrics
         in
-        evaluate_prog_aux prog2 hps ~k ~var_val ~rewrite_settings ~print
-          ?metrics
+        evaluate_prog_aux prog2 hps indent_level ~k ~var_val ~rewrite_settings
+          ~print ?metrics
     | Prog.For (name, i_start, i_end, prog) ->
+        (match print with
+        | Pr_plain oc ->
+            Printf.fprintf oc "%a\n%t\n"
+              (Prog.output_for_header ~indent_level)
+              (name, i_start, i_end)
+              (Prog.output_for_unfolding ~indent_level:(indent_level + 1))
+        | Pr_latex oc ->
+            Printf.fprintf oc "%a&\\\\\n%t&\\\\\n"
+              (Prog.output_latex_for_header ~indent_level)
+              (name, i_start, i_end)
+              (Prog.output_latex_for_unfolding ~indent_level:(indent_level + 1))
+        | Pr_none -> ());
         let i_start = Z.to_int @@ evaluate_int i_start ~var_val in
         let i_end = Z.to_int @@ evaluate_int i_end ~var_val in
         let rec loop i hps =
           if i < i_end then (
-            if print then Printf.printf "%s = %d:\n" name i;
+            (match print with
+            | Pr_plain oc ->
+                Printf.fprintf oc "%a\n"
+                  (Prog.output_for_iteration ~indent_level:(indent_level + 1))
+                  (name, i)
+            | Pr_latex oc ->
+                Printf.fprintf oc "%a&\\\\\n"
+                  (Prog.output_latex_for_iteration
+                     ~indent_level:(indent_level + 1))
+                  (name, i)
+            | Pr_none -> ());
             loop (i + 1)
-              (evaluate_prog_aux prog hps ~k
+              (evaluate_prog_aux prog hps (indent_level + 1) ~k
                  ~var_val:(Utils.Var_name_map.add name i var_val)
                  ~rewrite_settings ~print ?metrics))
           else hps
         in
-        loop i_start hps
+        let hps = loop i_start hps in
+        (match print with
+        | Pr_plain oc ->
+            Printf.fprintf oc "%t\n" (Prog.output_for_done ~indent_level)
+        | Pr_latex oc ->
+            Printf.fprintf oc "\\texttt{%t}&\\\\\n"
+              (Prog.output_latex_for_done ~indent_level)
+        | Pr_none -> ());
+        hps
     | Prog.IfElse (cond, prog1, prog2) ->
-        if print then print_endline (Prog.to_string prog ^ ":");
+        (match print with
+        | Pr_plain oc ->
+            Printf.fprintf oc "%a\n" (Prog.output_if_cond ~indent_level) cond
+        | Pr_latex oc ->
+            Printf.fprintf oc "\\texttt{%a}&\\\\\n"
+              (Prog.output_latex_if_cond ~indent_level)
+              cond
+        | Pr_none -> ());
         let cond = evaluate_bool cond hps ~var_val in
         let hps =
-          evaluate_prog_aux prog1 hps ~k:(Hket.mul k cond) ~var_val
-            ~rewrite_settings ~print ?metrics
+          evaluate_prog_aux prog1 hps (indent_level + 1) ~k:(Hket.mul k cond)
+            ~var_val ~rewrite_settings ~print ?metrics
         in
-        evaluate_prog_aux prog2 hps
-          ~k:Hket.(mul k (neg cond))
-          ~var_val ~rewrite_settings ~print ?metrics
+        (match print with
+        | Pr_plain oc ->
+            Printf.fprintf oc "%t\n" (Prog.output_else ~indent_level)
+        | Pr_latex oc ->
+            Printf.fprintf oc "\\texttt{%t}&\\\\\n"
+              (Prog.output_latex_else ~indent_level)
+        | Pr_none -> ());
+        let hps =
+          evaluate_prog_aux prog2 hps (indent_level + 1)
+            ~k:Hket.(mul k (neg cond))
+            ~var_val ~rewrite_settings ~print ?metrics
+        in
+        (match print with
+        | Pr_plain oc ->
+            Printf.fprintf oc "%t\n\n" (Prog.output_if_end ~indent_level)
+        | Pr_latex oc ->
+            Printf.fprintf oc "\\texttt{%t}&\\\\\n"
+              (Prog.output_latex_if_end ~indent_level)
+        | Pr_none -> ());
+        hps
     | Prog.Meas (qreg, creg) ->
         let hps, _ =
           auto_hh_with_settings rewrite_settings hps ~print ?metrics
@@ -319,7 +434,7 @@ let rec evaluate_prog_aux ?(k = Hket.one) ?(var_val = Utils.Var_name_map.empty)
             failwith
               "Cannot evaluate Meas if qreg len and creg len are not equal"
           else if qreg_len = 0 then (
-            if print then print_step prog hps;
+            print_step print prog hps indent_level;
             interactive_rewrite_with_settings rewrite_settings hps ?metrics)
           else
             let start_cmem = List.hd hps.output.cmem_stack in
@@ -343,24 +458,40 @@ let rec evaluate_prog_aux ?(k = Hket.one) ?(var_val = Utils.Var_name_map.empty)
                 { hps.output with cmem_stack = cmem :: hps.output.cmem_stack }
             in
             let hps = { hps with output } in
-            if print then print_step prog hps;
+            print_step print prog hps indent_level;
             Metrics.add_measures_opt metrics qreg_len;
             interactive_rewrite_with_settings rewrite_settings hps ?metrics
     | Prog.Gate gate ->
         let hps = gate.evaluate ~k ~var_val ?metrics hps in
-        if print then print_step prog hps;
+        print_step print prog hps indent_level;
         interactive_rewrite_with_settings rewrite_settings hps ?metrics
     | Prog.SetCReg (_creg, _i) ->
         failwith "SetCReg evaluation not implemented yet"
 
 let evaluate_prog ?(var_val = Utils.Var_name_map.empty)
-    ?(rewrite_settings = no_rewrite) ?(print = true) ?metrics prog hps =
+    ?(rewrite_settings = no_rewrite) ?(print = Pr_plain stdout) ?metrics prog
+    hps =
+  let print =
+    if rewrite_settings land interactive_rewrite = 1 then Pr_plain stdout
+    else print
+  in
+  (match print with
+  | Pr_plain _ -> ()
+  | Pr_latex oc -> Printf.fprintf oc "\\[\n\\begin{array}{ll}\n"
+  | Pr_none -> ());
   let hps =
-    evaluate_prog_aux ~var_val ~rewrite_settings ~print ?metrics prog hps
+    evaluate_prog_aux ~var_val ~rewrite_settings ~print ?metrics prog hps 0
   in
   let hps, rule_applied =
     auto_rewrite_with_settings rewrite_settings hps ~print ?metrics
   in
-  if rule_applied then
-    interactive_rewrite_with_settings rewrite_settings hps ?metrics
-  else hps
+  let hps =
+    if rule_applied then
+      interactive_rewrite_with_settings rewrite_settings hps ?metrics
+    else hps
+  in
+  (match print with
+  | Pr_plain _ -> ()
+  | Pr_latex oc -> Printf.fprintf oc "\n\\end{array}\n\\]"
+  | Pr_none -> ());
+  hps

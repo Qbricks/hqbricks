@@ -64,27 +64,43 @@ end
 let ( |> ) = apply_gate
 let ( => ) = if_b_then_p
 let ( -@ ) = meas
-let indent_len = 4
+let indent_len = 2
 
-let rec to_string_aux prog indent_level =
-  let open Stdlib in
-  let indent_str = String.make (indent_level * indent_len) ' ' in
+open Stdlib
+
+let indent_level_to_string indent_level =
+  String.make (indent_level * indent_len) ' '
+
+let indent_level_to_latex indent_level =
+  Utils.n_string "\\quad" indent_level ^ if indent_level = 0 then "" else " "
+
+let escape_special str =
+  String.fold_left
+    (fun acc c ->
+      match c with
+      | '_' -> acc ^ "\\_"
+      | '^' -> acc ^ "\\^{}"
+      | _ -> acc ^ String.make 1 c)
+    "" str
+
+let rec to_string_aux indent_level prog =
+  let indent_str = indent_level_to_string indent_level in
   match prog with
   | PVar var_name -> indent_str ^ var_name ^ ";"
   | Skip -> indent_str ^ "skip;"
   | InitQReg qreg -> indent_str ^ "init(" ^ qreg_to_string qreg ^ ");"
   | Seq (prog1, prog2) ->
-      to_string_aux prog1 indent_level ^ "\n" ^ to_string_aux prog2 indent_level
+      to_string_aux indent_level prog1 ^ "\n" ^ to_string_aux indent_level prog2
   | For (var_name, i_start, i_end, prog) ->
       indent_str ^ "for " ^ var_name ^ " = " ^ pr_int_to_string i_start ^ " to "
       ^ pr_int_to_string i_end ^ " do\n"
-      ^ to_string_aux prog (indent_level + 1)
+      ^ to_string_aux (indent_level + 1) prog
       ^ "\n" ^ indent_str ^ "done"
   | IfElse (cond, prog1, prog2) ->
       indent_str ^ "if " ^ pr_bool_to_string cond ^ " then\n"
-      ^ to_string_aux prog1 (indent_level + 1)
+      ^ to_string_aux (indent_level + 1) prog1
       ^ "\n" ^ indent_str ^ "else\n"
-      ^ to_string_aux prog2 (indent_level + 1)
+      ^ to_string_aux (indent_level + 1) prog2
       ^ "\n" ^ indent_str ^ "end"
   | Meas (qreg, creg) ->
       indent_str ^ qreg_to_string qreg ^ " -@ " ^ creg_to_string creg ^ ";"
@@ -93,8 +109,136 @@ let rec to_string_aux prog indent_level =
       indent_str ^ "set(" ^ creg_to_string creg ^ ", " ^ pr_int_to_string i
       ^ ");"
 
-let to_string prog = to_string_aux prog 0
+let rec to_latex_aux indent_level prog =
+  let indent_str = indent_level_to_latex indent_level in
+  (match prog with
+  | PVar var_name -> indent_str ^ var_name ^ ";"
+  | Skip -> indent_str ^ "skip;"
+  | InitQReg qreg -> indent_str ^ "init(" ^ qreg_to_string qreg ^ ");"
+  | Seq (prog1, prog2) ->
+      to_latex_aux indent_level prog1 ^ "\n" ^ to_latex_aux indent_level prog2
+  | For (var_name, i_start, i_end, prog) ->
+      indent_str ^ "for " ^ var_name ^ " = " ^ pr_int_to_string i_start ^ " to "
+      ^ pr_int_to_string i_end ^ " do\n"
+      ^ to_latex_aux (indent_level + 1) prog
+      ^ "\n" ^ indent_str ^ "done"
+  | IfElse (cond, prog1, prog2) ->
+      indent_str ^ "if " ^ pr_bool_to_string cond ^ " then\n"
+      ^ to_latex_aux (indent_level + 1) prog1
+      ^ "\n" ^ indent_str ^ "else\n"
+      ^ to_latex_aux (indent_level + 1) prog2
+      ^ "\n" ^ indent_str ^ "end"
+  | Meas (qreg, creg) ->
+      indent_str ^ qreg_to_string qreg ^ " -@ " ^ creg_to_string creg ^ ";"
+  | Gate gate -> indent_str ^ Gate.to_string gate ^ ";"
+  | SetCReg (creg, i) ->
+      indent_str ^ "set(" ^ creg_to_string creg ^ ", " ^ pr_int_to_string i
+      ^ ");")
+  |> escape_special
+
+let to_string = to_string_aux 0
+let to_latex = to_latex_aux 0
+
+let for_header_to_string_aux indent_level var_name i_start i_end =
+  let indent_str = indent_level_to_string indent_level in
+  indent_str ^ "for " ^ var_name ^ " = " ^ pr_int_to_string i_start ^ ", "
+  ^ pr_int_to_string i_end ^ " do"
+
+let for_header_to_latex_aux indent_level var_name i_start i_end =
+  let indent_str = indent_level_to_latex indent_level in
+  "\\texttt{" ^ indent_str ^ "for " ^ var_name ^ "} = \\texttt{"
+  ^ pr_int_to_string i_start ^ ", " ^ pr_int_to_string i_end ^ " do}"
+  |> escape_special
+
+let for_header_to_string = for_header_to_string_aux 0
+let for_header_to_latex = for_header_to_latex_aux 0
+
+let for_iteration_to_string_aux indent_level var_name i =
+  let indent_str = indent_level_to_string indent_level in
+  indent_str ^ "[" ^ var_name ^ " = " ^ string_of_int i ^ "]"
+
+let annotation_color = "gray"
+
+let for_iteration_to_latex_aux indent_level var_name i =
+  let indent_str = indent_level_to_latex indent_level in
+  "\\textcolor{" ^ annotation_color ^ "}{\\texttt{" ^ indent_str ^ var_name
+  ^ "} = " ^ string_of_int i ^ "}"
+  |> escape_special
+
+let for_iteration_to_string = for_iteration_to_string_aux 0
+let for_iteration_to_latex = for_iteration_to_latex_aux 0
+
+let if_cond_to_string_aux indent_level cond =
+  let indent_str = indent_level_to_string indent_level in
+  indent_str ^ "if " ^ pr_bool_to_string cond ^ " then"
+
+let if_cond_to_latex_aux indent_level cond =
+  let indent_str = indent_level_to_latex indent_level in
+  indent_str ^ "if " ^ pr_bool_to_string cond ^ " then" |> escape_special
+
+let if_cond_to_string = if_cond_to_string_aux 0
+let if_cond_to_latex = if_cond_to_latex_aux 0
+let for_unfolding_str = "unfolding..."
+let for_done_str = "done"
+let else_str = "else"
+let if_end_str = "end"
 let print prog = print_endline (to_string prog)
+
+let output ?(indent_level = 0) oc prog =
+  Printf.fprintf oc "%s" (to_string_aux indent_level prog)
+
+let output_for_header ?(indent_level = 0) oc (var_name, i_start, i_end) =
+  Printf.fprintf oc "%s"
+    (for_header_to_string_aux indent_level var_name i_start i_end)
+
+let output_for_iteration ?(indent_level = 0) oc (var_name, i) =
+  Printf.fprintf oc "%s" (for_iteration_to_string_aux indent_level var_name i)
+
+let output_if_cond ?(indent_level = 0) oc cond =
+  Printf.fprintf oc "%s" (if_cond_to_string_aux indent_level cond)
+
+let output_for_unfolding ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s[%s]"
+    (indent_level_to_string indent_level)
+    for_unfolding_str
+
+let output_for_done ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s%s" (indent_level_to_string indent_level) for_done_str
+
+let output_else ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s%s" (indent_level_to_string indent_level) else_str
+
+let output_if_end ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s%s" (indent_level_to_string indent_level) if_end_str
+
+let output_latex ?(indent_level = 0) oc prog =
+  Printf.fprintf oc "%s" (to_latex_aux indent_level prog)
+
+let output_latex_for_header ?(indent_level = 0) oc (var_name, i_start, i_end) =
+  Printf.fprintf oc "%s"
+    (for_header_to_latex_aux indent_level var_name i_start i_end)
+
+let output_latex_for_iteration ?(indent_level = 0) oc (var_name, i) =
+  Printf.fprintf oc "%s" (for_iteration_to_latex_aux indent_level var_name i)
+
+let output_latex_if_cond ?(indent_level = 0) oc cond =
+  Printf.fprintf oc "%s" (if_cond_to_latex_aux indent_level cond)
+
+let output_latex_for_unfolding ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s\\textcolor{%s}{\\texttt{%s}}"
+    (indent_level_to_latex indent_level)
+    annotation_color for_unfolding_str
+
+let output_latex_for_done ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s%s" (indent_level_to_latex indent_level) for_done_str
+
+let output_latex_else ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s%s" (indent_level_to_latex indent_level) else_str
+
+let output_latex_if_end ?(indent_level = 0) oc =
+  Printf.fprintf oc "%s%s" (indent_level_to_latex indent_level) if_end_str
+
+open Base
 
 let rec substitute_ivar var_name i_sub prog =
   match prog with

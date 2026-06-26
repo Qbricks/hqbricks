@@ -32,3 +32,8 @@ let to_string v =
   match v with
   | X i -> Printf.sprintf "x[%d]" i
   | Y i -> Printf.sprintf "y[%d]" i
+
+let to_latex v =
+  match v with
+  | X i -> Printf.sprintf "x_{%d}" i
+  | Y i -> Printf.sprintf "y_{%d}" i

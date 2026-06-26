@@ -59,10 +59,10 @@ let lift_ket ket dy_fact =
     let ket_card = Hket.cardinal ket in
     (*
      * Since phase is modulo 1 and every combinations of more than
-     * [Dyadic1.min_inv_pow2_leq dy_fact] elements will have a whole number
+     * [Dyadic1.den_pow dy_fact] elements will have a whole number
      * as factor, we can avoid computing those combinations
      *)
-    let comb_len_max = Int.min (Dyadic1.min_inv_pow2_leq dy_fact) ket_card in
+    let comb_len_max = Int.min (Dyadic1.den_pow dy_fact) ket_card in
     (* Array to index ket elements *)
     let ket_array =
       let a = Array.make ket_card Var_set.empty in
@@ -191,8 +191,17 @@ let find_all_y_not_one_half p =
           vs acc)
     p Y_set.empty
 
+let find_all_hkets p =
+  M.fold
+    (fun vs _ acc -> Hket_set.add (Hket.of_var_set vs) acc)
+    p Hket_set.empty
+
 let fold f p init = M.fold f p init
 let equal mem1 mem2 = M.equal Dyadic1.equal mem1 mem2
+
+let equiv mem1 mem2 =
+  equal (remove Var_set.empty mem1) (remove Var_set.empty mem2)
+
 let for_all = M.for_all
 let is_empty p = M.is_empty p
 let mem vs p = M.mem vs p
@@ -236,3 +245,21 @@ let to_string p =
     in
     let str = fold fold_fun p "" in
     String.sub str 0 (String.length str - 3)
+
+let to_latex p =
+  if M.cardinal p = 0 then "0"
+  else
+    let fold_fun vs d acc =
+      if Var_set.cardinal vs = 0 then
+        Printf.sprintf "%s%s+" acc (Dyadic1.to_latex d)
+      else
+        let str =
+          Var_set.fold
+            (fun v acc -> acc ^ Var.to_latex v)
+            vs
+            (acc ^ Dyadic1.to_latex d)
+        in
+        str ^ "+"
+    in
+    let str = fold fold_fun p "" in
+    String.sub str 0 (String.length str - 1)

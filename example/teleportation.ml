@@ -49,7 +49,7 @@ let metrics = Metrics.create ()
 let hps =
   Evaluator.(
     evaluate_prog teleportation_prog input_hps ~rewrite_settings:all_auto
-      ~print:true ~metrics)
+      ~print:(Pr_plain stdout) ~metrics)
 
 (* Specification HPS <0,1.|x0>bob>, we want to verify that the input
    state of psi has been teleported into bob *)

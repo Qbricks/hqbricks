@@ -303,14 +303,14 @@ let qec3 p =
                                                     } ),
                                               Gate
                                                 {
-                                                  name = "IE";
+                                                  name = "IE_X";
                                                   qreg_params =
                                                     [ QCons ("psi", Z.(~$1)) ];
                                                   params = [ Scalar p ];
                                                 } ),
                                           Gate
                                             {
-                                              name = "IE";
+                                              name = "IE_X";
                                               qreg_params =
                                                 [ QCons ("q", Z.(~$2)) ];
                                               params = [ Scalar p ];
@@ -467,7 +467,7 @@ let qec3' p =
                                                             } ),
                                                       Gate
                                                         {
-                                                          name = "ie";
+                                                          name = "ie_x";
                                                           qreg_params =
                                                             [
                                                               QCons
@@ -477,7 +477,7 @@ let qec3' p =
                                                         } ),
                                                   Gate
                                                     {
-                                                      name = "ie";
+                                                      name = "ie_x";
                                                       qreg_params =
                                                         [ QCons ("q", Z.(~$2)) ];
                                                       params = [ Scalar p ];
@@ -678,7 +678,7 @@ let qec3'' p =
                                                                   Gate
                                                                     {
                                                                       name =
-                                                                        "IE";
+                                                                        "IE_X";
                                                                       qreg_params =
                                                                         [
                                                                           QIndex
@@ -702,7 +702,7 @@ let qec3'' p =
                                                                     } ),
                                                               Gate
                                                                 {
-                                                                  name = "IE";
+                                                                  name = "IE_X";
                                                                   qreg_params =
                                                                     [
                                                                       QIndex
@@ -719,7 +719,7 @@ let qec3'' p =
                                                                 } ),
                                                           Gate
                                                             {
-                                                              name = "IE";
+                                                              name = "IE_X";
                                                               qreg_params =
                                                                 [
                                                                   QIndex

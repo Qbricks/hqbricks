@@ -92,6 +92,13 @@ let change_var yi new_val mem =
   M.map (fun ket -> Hket.change_var yi new_val ket) mem
 
 let cardinal = M.cardinal
+
+let cardinal_reg_name reg_name mem =
+  M.fold
+    (fun (reg_id_name, _) _ acc ->
+      if reg_name = reg_id_name then acc + 1 else acc)
+    mem 0
+
 let find reg_id mem = M.find reg_id mem
 
 let find_all_y mem =
@@ -116,6 +123,9 @@ let find_reg_names mem =
   M.fold
     (fun (qreg_name, _) _ acc -> Reg_name_set.add qreg_name acc)
     mem Reg_name_set.empty
+
+let find_all_hkets mem =
+  M.fold (fun _ ket acc -> Hket_set.add ket acc) mem Hket_set.empty
 
 let iter = M.iter
 let fold f mem acc = M.fold f mem acc
@@ -197,3 +207,29 @@ let cmem_to_string cm =
         cm ""
     in
     String.sub str 0 (String.length str - 1)
+
+let escape_special str =
+  String.fold_left
+    (fun acc c ->
+      match c with '_' -> acc ^ "\\_" | _ -> acc ^ String.make 1 c)
+    "" str
+
+let qmem_to_latex qm =
+  if M.cardinal qm = 0 then "\\_"
+  else
+    M.fold
+      (fun (qreg_name, i) ket acc ->
+        acc
+        ^ Printf.sprintf "\\left\\lvert %s \\right\\rangle_{%s_{%s}}"
+            (Hket.to_latex ket) (escape_special qreg_name) (Int.to_string i))
+      qm ""
+
+let cmem_to_latex cm =
+  if M.cardinal cm = 0 then ""
+  else
+    M.fold
+      (fun (creg_name, i) ket acc ->
+        acc
+        ^ Printf.sprintf "\\left[%s\\right]_{%s_{%s}}" (Hket.to_latex ket)
+            (escape_special creg_name) (Int.to_string i))
+      cm ""

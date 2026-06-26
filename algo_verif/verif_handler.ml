@@ -23,7 +23,7 @@
 type t = {
   log : (unit -> string) -> unit;
   log_verbose : (unit -> string) -> unit;
-  print_eval_steps : bool;
+  print_eval_steps : Hqbricks.Evaluator.print;
   fail : string -> unit;
 }
 
@@ -31,6 +31,6 @@ let default =
   {
     log = ignore;
     log_verbose = ignore;
-    print_eval_steps = false;
+    print_eval_steps = Pr_none;
     fail = failwith;
   }

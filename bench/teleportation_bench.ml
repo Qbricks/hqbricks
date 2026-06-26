@@ -42,7 +42,7 @@ let verify_teleportation ?metrics n =
   let input_hps = Hps.(one |> add_qmem_vec_x ("psi", 0) n 0) in
   let hps =
     Evaluator.(
-      evaluate_prog prog input_hps ~rewrite_settings:all_auto ~print:false
+      evaluate_prog prog input_hps ~rewrite_settings:all_auto ~print:Pr_none
         ?metrics)
   in
   let spec_hps = Hps.(one |> add_qmem_vec_x ("bob", 0) n 0) in

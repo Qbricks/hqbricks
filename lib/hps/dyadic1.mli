@@ -66,10 +66,6 @@ val num : t -> Z.t
 val den_pow : t -> int
 (** Get the power of 2 of the denominator. *)
 
-val min_inv_pow2_leq : t -> int
-(** [min_inv_pow2_leq d] computes the smallest integer [p] such that
-    [1 / 2^p <= d]. *)
-
 (** {1:comparisons Comparisons} *)
 
 val equal : t -> t -> bool
@@ -85,3 +81,6 @@ val to_float : t -> Mlmpfr.mpfr_float
 
 val to_string : t -> string
 (** Convert to string. *)
+
+val to_latex : t -> string
+(** Convert to LaTeX string. *)

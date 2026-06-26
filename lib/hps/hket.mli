@@ -176,6 +176,9 @@ val contains_y_from_set : Y_set.t -> t -> bool
 val of_var : Var.t -> t
 (** Return a ket containing one monomial with the given var. *)
 
+val of_var_set : Var_set.t -> t
+(** Return a ket containing one monomial with the given var set. *)
+
 val of_string : string -> t
 (** Convert the given string to a ket. Input variables must be of the form [x0]
     or [X12], path variables of the form [y2] or [Y21], xor of the form [+] or
@@ -190,3 +193,6 @@ val of_string_opt : string -> t option
 
 val to_string : t -> string
 (** Convert to string. *)
+
+val to_latex : t -> string
+(** Convert to LaTeX string. *)

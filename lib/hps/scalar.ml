@@ -502,6 +502,52 @@ and angle_find_all_xy a =
   | AAdd (a1, a2) -> Var_set.union (angle_find_all_xy a1) (angle_find_all_xy a2)
   | ANeg a -> angle_find_all_xy a
 
+let rec find_all_hkets_aux s =
+  match s with
+  | SVar _ | SFrac _ | SFloat _ -> Hket_set.empty
+  | SBool ket -> Hket_set.singleton ket
+  | Sqrt s -> find_all_hkets_aux s
+  | Cos a -> angle_find_all_hkets_aux a
+  | Sin a -> angle_find_all_hkets_aux a
+  | SAdd (s1, s2) ->
+      Hket_set.union (find_all_hkets_aux s1) (find_all_hkets_aux s2)
+  | SMul (s1, s2) ->
+      Hket_set.union (find_all_hkets_aux s1) (find_all_hkets_aux s2)
+  | SPowB (s, ket) -> Hket_set.add ket (find_all_hkets_aux s)
+  | SNeg s -> find_all_hkets_aux s
+  | SInv s -> find_all_hkets_aux s
+
+and angle_find_all_hkets_aux a =
+  match a with
+  | AFrac _ | AFloat _ -> Hket_set.empty
+  | ArcCos s -> find_all_hkets_aux s
+  | ArcSin s -> find_all_hkets_aux s
+  | AMulB (ket, a) -> Hket_set.add ket (angle_find_all_hkets_aux a)
+  | AMulI (_, a) -> angle_find_all_hkets_aux a
+  | AAdd (a1, a2) ->
+      Hket_set.union (angle_find_all_hkets_aux a1) (angle_find_all_hkets_aux a2)
+  | ANeg a -> angle_find_all_hkets_aux a
+
+let rec find_all_hkets s =
+  match s with
+  | Sqrt s -> find_all_hkets s
+  | SMul (s1, s2) -> Hket_set.union (find_all_hkets s1) (find_all_hkets s2)
+  | _ as s ->
+      let kets = find_all_hkets_aux s in
+      (* We use this function in separation functions, in which scalar product
+         elements containing more than one hket are not handled yet. *)
+      if Hket_set.cardinal kets > 1 then
+        failwith
+          "An element of the scalar product cannot contain more than one hket"
+      else kets
+
+and angle_find_all_hkets a =
+  let kets = angle_find_all_hkets_aux a in
+  if Hket_set.cardinal kets > 1 then
+    failwith
+      "An element of the scalar product cannot contain more than one hket"
+  else kets
+
 let rec contains_any_x s =
   match s with
   | SVar _ -> false
@@ -864,3 +910,71 @@ let to_string s = to_string_aux OpFun s
 let angle_to_string a = angle_to_string_aux OpFun a
 let to_raw_string s = show s
 let angle_to_raw_string a = show_angle a
+
+let rec to_latex_aux prev_op s =
+  match s with
+  | SVar str -> str
+  | SBool b -> Hket.to_latex b
+  | SFrac (i1, i2) -> (
+      if i2 = Z.one then Z.to_string i1
+      else
+        let str = "\\frac{" ^ Z.to_string i1 ^ "}{" ^ Z.to_string i2 ^ "}" in
+        match prev_op with OpFun -> str | _ -> "\\left(" ^ str ^ "\\right)")
+  | SFloat f -> Mlmpfr.get_formatted_str ~size:11 f
+  | Sqrt s -> "\\sqrt{" ^ to_latex_aux OpFun s ^ "}"
+  | Cos a -> "\\cos\\left(" ^ angle_to_latex_aux OpFun a ^ "\\right)"
+  | Sin a -> "\\sin\\left(" ^ angle_to_latex_aux OpFun a ^ "\\right)"
+  | SAdd (s1, SNeg s2) -> (
+      let str = to_latex_aux OpAdd s1 ^ "-" ^ to_latex_aux OpNone s2 in
+      match prev_op with
+      | OpAdd | OpFun -> str
+      | _ -> "\\left(" ^ str ^ "\\right)")
+  | SAdd (s1, s2) -> (
+      let str = to_latex_aux OpAdd s1 ^ "+" ^ to_latex_aux OpAdd s2 in
+      match prev_op with
+      | OpAdd | OpFun -> str
+      | _ -> "\\left(" ^ str ^ "\\right)")
+  | SMul (s1, s2) -> (
+      let str = to_latex_aux OpMul s1 ^ to_latex_aux OpMul s2 in
+      match prev_op with
+      | OpMul | OpFun -> str
+      | _ -> "\\left(" ^ str ^ "\\right)")
+  | SPowB (s, b) -> (
+      let str = to_latex_aux OpNone s ^ "^{" ^ Hket.to_latex b ^ "}" in
+      match prev_op with OpFun -> str | _ -> str)
+  | SNeg s -> "-" ^ to_latex_aux OpNone s
+  | SInv s -> (
+      let str = "\\frac{1}{" ^ to_latex_aux OpNone s ^ "}" in
+      match prev_op with OpFun -> str | _ -> "\\left(" ^ str ^ "\\right)")
+
+and angle_to_latex_aux prev_op a =
+  match a with
+  | AFrac (i1, i2) -> (
+      let str =
+        "2\\pi*\\frac{" ^ Z.to_string i1 ^ "}{" ^ Z.to_string i2 ^ "}"
+      in
+      match prev_op with OpFun -> str | _ -> "\\left(" ^ str ^ "\\right)")
+  | AFloat f -> Mlmpfr.get_formatted_str ~size:11 f
+  | ArcCos s -> "\\arccos\\left(" ^ to_latex_aux OpFun s ^ "\\right)"
+  | ArcSin s -> "\\arcsin\\left(" ^ to_latex_aux OpFun s ^ "\\right)"
+  | AMulB (b, a) -> (
+      let str = Hket.to_latex b ^ angle_to_latex_aux OpMul a in
+      match prev_op with
+      | OpMul | OpFun -> str
+      | _ -> "\\left(" ^ str ^ "\\right)")
+  | AMulI (i, a) -> (
+      let str = Z.to_string i ^ angle_to_latex_aux OpMul a in
+      match prev_op with
+      | OpMul | OpFun -> str
+      | _ -> "\\left(" ^ str ^ "\\right)")
+  | AAdd (a1, a2) -> (
+      let str =
+        angle_to_latex_aux OpAdd a1 ^ "+" ^ angle_to_latex_aux OpAdd a2
+      in
+      match prev_op with
+      | OpAdd | OpFun -> str
+      | _ -> "\\left(" ^ str ^ "\\right)")
+  | ANeg a -> "-" ^ angle_to_latex_aux OpNone a
+
+let to_latex s = to_latex_aux OpFun s
+let angle_to_latex a = angle_to_latex_aux OpFun a

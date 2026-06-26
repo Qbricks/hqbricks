@@ -54,12 +54,23 @@ val all_auto : int
 val all_rewrite : int
 (** Rewrite settings flag to enable all rewrite flags. *)
 
+(** {1:printing Printing} *)
+
+(** Output format for printing evaluation and rewriting steps. When provided, it
+    determines the output style of {!evaluate_prog}. *)
+type print =
+  | Pr_none  (** No print. *)
+  | Pr_plain of out_channel
+      (** Print as plain text to the given output channel. *)
+  | Pr_latex of out_channel
+      (** Print to LaTeX format to the given output channel. *)
+
 (** {1:evaluation Evaluation} *)
 
 val evaluate_prog :
   ?var_val:int Utils.Var_name_map.t ->
   ?rewrite_settings:int ->
-  ?print:bool ->
+  ?print:print ->
   ?metrics:Metrics.t ->
   Prog.t ->
   Hps.t ->
@@ -71,8 +82,9 @@ val evaluate_prog :
     flags can be combined using [+] (for example
     [interactive_rewrite + auto_hh]), {!no_rewrite} by default.
 
-    [print] can be set to true/false to enable/disable the printing of details
-    during the evaluation, enabled by default.
+    [print] can be set to {!Pr_none}, {!Pr_plain} or {!Pr_latex} to
+    enable/disable the printing of details during the evaluation and choose the
+    format and the out_channel, enabled on stdout by default.
 
     If [~metrics] is provided, it is updated in place to reflect the
     computation; it has no effect on the result (see {!Metrics}). *)

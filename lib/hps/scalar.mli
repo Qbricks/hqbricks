@@ -157,6 +157,14 @@ val angle_find_all_xy : angle -> Var_set.t
 (** Return a set of all the input variables x and path variables y from the
     given angle. *)
 
+val find_all_hkets : t -> Hket_set.t
+(** Return a set of all {!Hket} in the given scalar. Raise [Failure] if an
+    element of the scalar product contains more than one hket. *)
+
+val angle_find_all_hkets : angle -> Hket_set.t
+(** Return a set of all {!Hket} in the given angle. Raise [Failure] if the angle
+    contains more than one hket. *)
+
 (** {1:comparisons Comparisons} *)
 
 val equal : t -> t -> bool
@@ -376,6 +384,12 @@ val to_raw_string : t -> string
 val angle_to_raw_string : angle -> string
 (** Convert the given angle to a raw string, usefull to see the exact structure
     of the variant. *)
+
+val to_latex : t -> string
+(** Convert the given scalar to LaTeX string. *)
+
+val angle_to_latex : angle -> string
+(** Convert the given angle to LaTeX string. *)
 
 (** {1:printing Printing} *)
 

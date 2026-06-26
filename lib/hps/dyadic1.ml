@@ -46,6 +46,13 @@ module Dyadic = struct
       | _ -> " / (2 ^ " ^ Int.to_string d.den_pow ^ ")"
     in
     Z.to_string d.num ^ den_str
+
+  let to_latex d =
+    let num = Z.to_string d.num in
+    match d.den_pow with
+    | 0 -> num
+    | 1 -> "\\frac{" ^ num ^ "}{2}"
+    | _ -> "\\frac{" ^ num ^ "}{2^{" ^ Int.to_string d.den_pow ^ "}}"
 end
 
 type t = DyadicMod1 of Dyadic.t
@@ -77,19 +84,6 @@ let mul_pow2 pow2 (DyadicMod1 d) =
 
 let num (DyadicMod1 d) = d.num
 let den_pow (DyadicMod1 d) = d.den_pow
-
-(* This function computes the smallest integer p such that 1/2^p <= d *)
-let min_inv_pow2_leq d =
-  let d = reduce d in
-  if den_pow d <= 0 then invalid_arg "d must be greater than 0"
-  else if num d = Z.one then den_pow d
-  else
-    let inv_d = Q.make Z.(~$1 lsl den_pow d) (num d) in
-    let rec loop p pow2 =
-      if Q.(geq pow2 inv_d) then p else loop (p + 1) Q.(pow2 lsl 1)
-    in
-    loop 0 Q.one
-
 let equal d1 d2 = reduce d1 = reduce d2
 let to_q (DyadicMod1 d) = Q.make d.num Z.(~$1 lsl d.den_pow)
 
@@ -101,3 +95,4 @@ let to_float d =
       (make_from_str Q.(Z.to_string q.den)))
 
 let to_string (DyadicMod1 d) = Dyadic.to_string d
+let to_latex (DyadicMod1 d) = Dyadic.to_latex d

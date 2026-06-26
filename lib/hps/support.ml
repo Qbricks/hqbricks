@@ -43,3 +43,9 @@ let to_string su =
   ^ String.concat ", "
       (List.map (fun i -> "y" ^ Int.to_string i) (S.elements su))
   ^ "}"
+
+let to_latex su =
+  "\\left\\{"
+  ^ String.concat ","
+      (List.map (fun i -> "y_{" ^ Int.to_string i ^ "}") (S.elements su))
+  ^ "\\right\\}"

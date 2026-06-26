@@ -35,9 +35,9 @@ let qec3 n error_p =
   init_qreg q0 -- init_qreg q1
   -- ((psi, "i") >> (q_idxv q0 "i" |> x))
   -- ((q0, "i") >> (q_idxv q1 "i" |> x))
-  -- (psi |> ie error_p)
-  -- (q0 |> ie error_p)
-  -- (q1 |> ie error_p)
+  -- (psi |> ie_x error_p)
+  -- (q0 |> ie_x error_p)
+  -- (q1 |> ie_x error_p)
   -- init_qreg c0 -- init_qreg c1 -- (c0 |> h) -- (c1 |> h)
   -- ((c0, "i") >> (q_idxv psi "i" |> z) -- (q_idxv q0 "i" |> z))
   -- ((c1, "i") >> (q_idxv q0 "i" |> z) -- (q_idxv q1 "i" |> z))
@@ -54,7 +54,7 @@ let verify_qec3 ?metrics n error_p spec_success_p =
   let input_hps = Hps.(one |> add_qmem_vec_x ("psi", 0) n 0) in
   let hps =
     Evaluator.(
-      evaluate_prog prog input_hps ~rewrite_settings:all_auto ~print:false
+      evaluate_prog prog input_hps ~rewrite_settings:all_auto ~print:Pr_none
         ?metrics)
   in
   let spec_qmem =

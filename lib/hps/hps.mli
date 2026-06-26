@@ -63,6 +63,7 @@ module Mem = Mem
 module Mem_stack = Mem_stack
 module Output = Output
 module Support = Support
+module Hket_set = Hket_set
 
 type t = {
   phase : Phase.t;  (** Phase. *)
@@ -234,6 +235,12 @@ val norm2_opt : t -> Scalar.t option
 
     Return [None] if the squared norm cannot be computed. *)
 
+(** {1:searching Searching} *)
+
+val find_all_hkets : t -> Hket_set.t
+(** Return a set of all {!Hket} in the given HPS. Raise [Failure] if an element
+    of the scalar product of the HPS contains more than one hket. *)
+
 (** {1:comparisons Comparisons} *)
 
 val equal : t -> t -> bool
@@ -265,3 +272,9 @@ val cmem_reg_to_int_big_endian : string -> int -> t -> Z.t
 
 val to_string : t -> string
 (** Convert to string. *)
+
+val to_latex : t -> string
+(** Convert to LaTeX string. *)
+
+val to_latex_block : t -> string
+(** Convert to LaTeX string inside \[ and \]. *)

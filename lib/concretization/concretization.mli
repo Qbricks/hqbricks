@@ -43,6 +43,9 @@ module Vector_map : sig
 
   val to_string : t -> string
   (** Convert to string. *)
+
+  val fprint : out_channel -> t -> unit
+  (** Print a Vector_map on the given channel *)
 end
 
 val hps_proba_output : Hps.Output.t -> Hps.t -> Hps.Scalar.t
@@ -52,6 +55,19 @@ val hps_proba_output : Hps.Output.t -> Hps.t -> Hps.Scalar.t
 val hps_proba_qmem : Hps.Mem.t -> Hps.t -> Hps.Scalar.t
 (** [hps_proba_qmem qmem_spec hps] returns the probability that [hps] satisfies
     [qmem_spec], that is, [hps.qmem] is equal to [qmem_spec]. *)
+
+val hps_proba_qmem_phase : Hps.Mem.t -> Hps.Phase.t -> Hps.t -> Hps.Scalar.t
+(** [hps_proba_qmem_phase qmem_spec phase_spec hps] returns the probability that
+    [hps] satisfies [qmem_spec] and [phase_spec], that is, [hps.qmem] is equal
+    to [qmem_spec] and [hps.phase] is equal to [phase_spec] with a global phase
+    gap. *)
+
+val hps_proba_qmem_no_rel_phase : Hps.Mem.t -> Hps.t -> Hps.Scalar.t
+(** [hps_proba_qmem_no_rel_phase qmem_spec phase_spec hps] returns the
+    probability that [hps] satisfies [qmem_spec] and has no relative phase, that
+    is, [hps.qmem] is equal to [qmem_spec] and [hps.phase] has no relative
+    phase. This is similar to running hps_proba_qmem_phase qmem_spec Phase.zero
+    hps.*)
 
 val hps_proba_qmem_fact :
   ?metrics:Metrics.t -> Hps.Mem.t -> Hps.t -> Hps.Scalar.t

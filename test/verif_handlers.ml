@@ -27,7 +27,7 @@ let quiet =
     {
       log = (fun f -> print_endline @@ f ());
       log_verbose = ignore;
-      print_eval_steps = false;
+      print_eval_steps = Pr_none;
       fail = Alcotest.fail;
     }
 
@@ -36,6 +36,6 @@ let verbose =
     {
       log = (fun f -> print_endline @@ f ());
       log_verbose = (fun f -> print_endline @@ f ());
-      print_eval_steps = true;
+      print_eval_steps = Pr_plain stdout;
       fail = Alcotest.fail;
     }

@@ -76,7 +76,10 @@
     {!Evaluator.rewrite_settings_flags}, and rewrite rules in the {!Rewrite}
     module.
 
-    [~print:true] enables the display of evaluation steps and rewritings.
+    [~print:(Pr_plain stdout)] enables the display of evaluation steps and
+    rewritings. For improved readability, the evaluation steps can also be
+    written to a LaTeX file, see {{!Evaluator.printing} Evaluation Printing} for
+    more details about printing options.
 
     The optional argument [~metrics] is updated in place to record the number of
     gates, measurements, and rewrite rules applied during the evaluation. See
@@ -94,7 +97,7 @@
       let hps =
         Evaluator.(
           evaluate_prog teleportation_prog input_hps ~rewrite_settings:all_auto
-            ~print:true ~metrics)
+            ~print:(Pr_plain stdout) ~metrics)
     ]}
 
     {2:teleportation-verification Teleportation verification}
@@ -159,7 +162,7 @@
       let hps =
         Evaluator.(
           evaluate_prog teleportation_prog input_hps ~rewrite_settings:all_auto
-            ~print:true ~metrics)
+            ~print:(Pr_plain stdout) ~metrics)
 
       (* Specification HPS <0,1.|x0>bob>, we want to verify that the input
          state of psi has been teleported into bob *)

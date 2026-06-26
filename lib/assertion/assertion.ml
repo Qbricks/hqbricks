@@ -29,11 +29,11 @@ let assert_hps_eq hps1 hps2 = assert (hps_eq hps1 hps2)
 let prog_eq ?metrics prog1 prog2 hps_input =
   let open Evaluator in
   let hps1 =
-    evaluate_prog prog1 hps_input ~rewrite_settings:all_auto ~print:false
+    evaluate_prog prog1 hps_input ~rewrite_settings:all_auto ~print:Pr_none
       ?metrics
   in
   let hps2 =
-    evaluate_prog prog2 hps_input ~rewrite_settings:all_auto ~print:false
+    evaluate_prog prog2 hps_input ~rewrite_settings:all_auto ~print:Pr_none
       ?metrics
   in
   hps_eq hps1 hps2
@@ -363,8 +363,8 @@ let unitary_eq ?metrics prog1 prog2 hps_input =
       let p1_p2i = Prog.seq prog1 p2i in
       let hps =
         Evaluator.(
-          evaluate_prog p1_p2i hps_input ~rewrite_settings:all_auto ~print:false
-            ?metrics)
+          evaluate_prog p1_p2i hps_input ~rewrite_settings:all_auto
+            ~print:Pr_none ?metrics)
       in
       hps_eq hps hps_input
   | None -> false
